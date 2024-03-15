@@ -1,9 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TimeRemainingWidget extends StatelessWidget {
-  const TimeRemainingWidget({
+  late final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final String seconds, link, coins, type, id, taskname;
+  TimeRemainingWidget({
     super.key,
+    required this.seconds,
+    required this.link,
+    required this.coins,
+    required this.type,
+    required this.id,
+    required this.taskname,
   });
+
+  void handleCancelButton(context) {
+    removePrefs();
+    Navigator.pop(context);
+  }
+
+  void handleContinueButton(context) {
+    Navigator.pop(context);
+    Navigator.pushNamed(context, "/tracking", arguments: {
+      'link': link,
+      'coin': coins.toString(),
+      'seconds': seconds,
+      'type': type,
+      'id': id,
+      'taskname': taskname,
+    });
+  }
+
+  void removePrefs() async {
+    final SharedPreferences prefs = await _prefs;
+    prefs.remove("coin");
+    prefs.remove(prefs.getString("currentLink")!);
+    prefs.remove("currentLink");
+    prefs.remove("type");
+    prefs.remove("id");
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,17 +65,20 @@ class TimeRemainingWidget extends StatelessWidget {
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(width: 3, color: Colors.white)),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            '0',
-                            style: TextStyle(
+                            (int.parse(seconds) / 60)
+                                .toString()
+                                .toString()
+                                .substring(0, 1),
+                            style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 30,
                                 fontWeight: FontWeight.w600),
                           ),
-                          Text(
+                          const Text(
                             "MINUTES",
                             style: TextStyle(
                                 color: Colors.white,
@@ -60,17 +98,17 @@ class TimeRemainingWidget extends StatelessWidget {
                           color: Colors.green,
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(width: 3, color: Colors.white)),
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            '20',
-                            style: TextStyle(
+                            (int.parse(seconds) % 60).toString(),
+                            style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 30,
                                 fontWeight: FontWeight.w600),
                           ),
-                          Text(
+                          const Text(
                             "SECONDS",
                             style: TextStyle(
                                 color: Colors.white,
@@ -98,7 +136,9 @@ class TimeRemainingWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   MaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      handleCancelButton(context);
+                    },
                     minWidth: 120,
                     color: Colors.grey.shade400,
                     shape: RoundedRectangleBorder(
@@ -106,7 +146,9 @@ class TimeRemainingWidget extends StatelessWidget {
                     child: const Text("Close"),
                   ),
                   MaterialButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      handleContinueButton(context);
+                    },
                     minWidth: 120,
                     color: Colors.amber.shade700,
                     shape: RoundedRectangleBorder(

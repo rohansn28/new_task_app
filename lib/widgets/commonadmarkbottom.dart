@@ -12,7 +12,7 @@ class AdMarkBottom extends StatelessWidget {
       bottom: 2,
       child: Text(
         'AD',
-        style: TextStyle(color: Colors.white, fontSize: 4.0),
+        style: TextStyle(color: Colors.white, fontSize: 6.0),
       ),
     );
   }

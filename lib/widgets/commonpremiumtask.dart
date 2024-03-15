@@ -1,13 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:new_task/widgets/commonadmarkbottom.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class CommonPremiumTask extends StatelessWidget {
+class CommonPremiumTask extends StatefulWidget {
   final String btnText;
+  final String stayTime;
+  final String winCoin;
+  final String url;
+  final int index;
 
   const CommonPremiumTask({
     super.key,
     required this.btnText,
+    required this.stayTime,
+    required this.winCoin,
+    required this.url,
+    required this.index,
   });
+
+  @override
+  State<CommonPremiumTask> createState() => _CommonPremiumTaskState();
+}
+
+class _CommonPremiumTaskState extends State<CommonPremiumTask> {
+  late SharedPreferences _prefs;
+  late DateTime _lastCompletion;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSharedPreferences();
+  }
+
+  Future<void> _initializeSharedPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+
+    _lastCompletion = DateTime.fromMillisecondsSinceEpoch(_prefs.getInt(
+            'lastCompletion ${widget.btnText + widget.index.toString()}') ??
+        0);
+  }
+
+  bool _canPerformTask() {
+    DateTime now = DateTime.now();
+    Duration difference = now.difference(_lastCompletion);
+
+    // return difference.inHours >= 24;
+    return difference.inMinutes >= 5;
+  }
+
+  void _performTask() {
+    if (_canPerformTask()) {
+      Navigator.pushNamed(context, '/tracking', arguments: {
+        "link": widget.url,
+        "coin": widget.winCoin,
+        "seconds": widget.stayTime,
+        "type": "task",
+        "id": widget.index.toString(),
+        "taskname":
+            'lastCompletion ${widget.btnText + widget.index.toString()}',
+      });
+      // Add your task execution logic here
+      // For example, navigate to a new page or execute a function
+    } else {
+      // Display a message indicating the user needs to wait
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Task Locked'),
+            content: const Text('You can perform this task again in 24 hours.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +99,9 @@ class CommonPremiumTask extends StatelessWidget {
             Stack(
               children: [
                 InkWell(
+                  onTap: () {
+                    _performTask();
+                  },
                   child: Container(
                     height: 50,
                     width: MediaQuery.of(context).size.width * 0.5,
@@ -35,7 +112,7 @@ class CommonPremiumTask extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        btnText,
+                        widget.btnText,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
@@ -52,10 +129,11 @@ class CommonPremiumTask extends StatelessWidget {
             const SizedBox(
               height: 8,
             ),
-            const Text(
-              "Complete task accoding to this video and send proof on mail to win 2000 coins",
+            Text(
+              "Complete task in ${widget.stayTime} Seconds to win ${widget.winCoin} coins",
+              // "Complete task accoding to this video and send proof on mail to win 2000 coins",
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),

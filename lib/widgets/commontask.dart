@@ -1,16 +1,98 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:new_task/widgets/commonadmarkbottom.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class commontask extends StatelessWidget {
+class commontask extends StatefulWidget {
   final String btnText;
   final String stayTime;
   final String winCoin;
+  final String url;
+  final int index;
   const commontask({
     super.key,
     required this.btnText,
     required this.stayTime,
     required this.winCoin,
+    required this.url,
+    required this.index,
   });
+
+  @override
+  State<commontask> createState() => _commontaskState();
+}
+
+class _commontaskState extends State<commontask> {
+  late SharedPreferences _prefs;
+  late DateTime _lastCompletion;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSharedPreferences();
+  }
+
+  Future<void> _initializeSharedPreferences() async {
+    _prefs = await SharedPreferences.getInstance();
+    // _lastCompletion = _prefs.getInt('lastCompletion ${widget.btnText + widget.index.toString()}');
+    // print(_prefs
+    //     .getInt('lastCompletion ${widget.btnText + widget.index.toString()}'));
+    _lastCompletion = DateTime.fromMillisecondsSinceEpoch(_prefs.getInt(
+            'lastCompletion ${widget.btnText + widget.index.toString()}') ??
+        0);
+    // print(_lastCompletion);
+    // print(_lastCompletion);
+  }
+
+  bool _canPerformTask() {
+    DateTime now = DateTime.now();
+    Duration difference = now.difference(_lastCompletion);
+
+    return difference.inMinutes >= 24;
+  }
+
+  void _performTask() {
+    if (_canPerformTask()) {
+      // Perform the task
+      // Update the last completion timestamp
+      // _prefs.setInt(
+      //     'lastCompletion ${widget.btnText + widget.index.toString()}',
+      //     DateTime.now().millisecondsSinceEpoch);
+      // setState(() {
+      //   _lastCompletion = DateTime.now();
+      // });
+      Navigator.pushNamed(context, '/tracking', arguments: {
+        "link": widget.url,
+        "coin": widget.winCoin,
+        "seconds": widget.stayTime,
+        "type": "task",
+        "id": widget.index.toString(),
+        "taskname":
+            'lastCompletion ${widget.btnText + widget.index.toString()}',
+      });
+      // Add your task execution logic here
+      // For example, navigate to a new page or execute a function
+    } else {
+      // Display a message indicating the user needs to wait
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('Task Locked'),
+            content: const Text('You can perform this task again in 24 hours.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +111,20 @@ class commontask extends StatelessWidget {
             Stack(
               children: [
                 InkWell(
+                  onTap: () {
+                    // launchCustomTabURL(context, url);
+                    _performTask();
+
+                    // Navigator.pushNamed(context, '/tracking', arguments: {
+                    //   "link": widget.url,
+                    //   "coin": widget.winCoin,
+                    //   "seconds": widget.stayTime,
+                    //   "type": "task",
+                    //   "id": widget.index.toString(),
+                    //   "taskname":
+                    //       'lastCompletion ${widget.btnText + widget.index.toString()}',
+                    // });
+                  },
                   child: Container(
                     height: 50,
                     width: MediaQuery.of(context).size.width * 0.5,
@@ -39,7 +135,7 @@ class commontask extends StatelessWidget {
                     ),
                     child: Center(
                       child: Text(
-                        btnText,
+                        widget.btnText,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           color: Colors.white,
@@ -57,7 +153,9 @@ class commontask extends StatelessWidget {
               height: 8,
             ),
             Text(
-              "Play game $stayTime Seconds to win $winCoin coins",
+              widget.btnText.contains('TASK')
+                  ? "Visit task for ${widget.stayTime} Seconds to win ${widget.winCoin} coins"
+                  : "Play game ${widget.stayTime} Seconds to win ${widget.winCoin} coins",
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,

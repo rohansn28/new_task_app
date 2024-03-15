@@ -1,15 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:new_task/game_home.dart';
+import 'package:new_task/variables/local_variables.dart';
 import 'package:new_task/widgets/commonadmarkbottom.dart';
 import 'package:new_task/widgets/commonmincoinbar.dart';
 import 'package:new_task/widgets/commontop.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HelpScreen extends StatelessWidget {
+class HelpScreen extends StatefulWidget {
   const HelpScreen({super.key});
+
+  @override
+  State<HelpScreen> createState() => _HelpScreenState();
+}
+
+class _HelpScreenState extends State<HelpScreen> {
+  Future<void> _refreshData() async {
+    // Fetch updated data from shared preferences
+
+    int updatedCoins = await SharedPreferences.getInstance().then((prefs) {
+      return prefs.getInt(gameCoinsLabel) ?? 0;
+    });
+
+    // Update UI
+    setState(() {
+      gameCoins = updatedCoins;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: InkWell(
+          child: Icon(Icons.arrow_back),
+          onTap: () {
+            Navigator.pop(context);
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GameHome(),
+              ),
+            );
+          },
+        ),
         title: const Text('HELP'),
       ),
       body: SingleChildScrollView(
@@ -18,7 +51,9 @@ class HelpScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                const Commontop(),
+                Commontop(
+                  refreshCallback: _refreshData,
+                ),
                 const SizedBox(
                   height: 16,
                 ),
