@@ -12,6 +12,7 @@ import 'package:new_task/task_line_screen.dart';
 import 'package:new_task/utils/web.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await fetchButtonLinks('buttonlinks');
 
   runApp(const MyApp());
