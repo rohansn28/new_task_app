@@ -16,6 +16,7 @@ class BounsScreen extends StatefulWidget {
 }
 
 class _BounsScreenState extends State<BounsScreen> {
+  late SharedPreferences _prefs;
   Future<void> _refreshData() async {
     // Fetch updated data from shared preferences
 
@@ -35,7 +36,7 @@ class _BounsScreenState extends State<BounsScreen> {
       appBar: AppBar(
         leading: InkWell(
           child: Icon(Icons.arrow_back),
-          onTap: () {
+          onTap: () async {
             Navigator.pop(context);
             Navigator.pushReplacement(
               context,
@@ -43,57 +44,74 @@ class _BounsScreenState extends State<BounsScreen> {
                 builder: (context) => GameHome(),
               ),
             );
+            if (gameCoins >= phase && phase != 0) {
+              _prefs = await SharedPreferences.getInstance();
+              _prefs.setInt('${phase}Coin-Completiontime',
+                  DateTime.now().millisecondsSinceEpoch);
+            }
           },
         ),
         title: const Text('HOURLY BONUSES'),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Commontop(
-                refreshCallback: _refreshData,
+      body: PopScope(
+        onPopInvoked: (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GameHome(),
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              const CommonMinCoinBar(),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: FutureBuilder<List<Applink>>(
-                  future: fetchBonusData('bonuslinks'),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          // print(snapshot.data![index].link);
-                          return CommonTask2(
-                            btnText: "BONUS ${index + 1}",
-                            stayTime: '5', //120
-                            winCoin: '1000',
-                            url: snapshot.data![index].link,
-                            index: index,
-                          );
-                        },
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text('${snapshot.error}');
-                    }
-
-                    return const Center(
-                      child: Text(
-                        'Loading...',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
-                  },
+            );
+          });
+        },
+        child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Commontop(
+                  refreshCallback: _refreshData,
                 ),
-              ),
-            ],
+                const SizedBox(
+                  height: 16,
+                ),
+                const CommonMinCoinBar(),
+                const SizedBox(
+                  height: 20,
+                ),
+                Expanded(
+                  child: FutureBuilder<List<Applink>>(
+                    future: fetchBonusData('bonuslinks'),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            // print(snapshot.data![index].link);
+                            return CommonTask2(
+                              btnText: "BONUS ${index + 1}",
+                              stayTime: '5', //120
+                              winCoin: '1000',
+                              url: snapshot.data![index].link,
+                              index: index,
+                            );
+                          },
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('${snapshot.error}');
+                      }
+
+                      return const Center(
+                        child: Text(
+                          'Loading...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

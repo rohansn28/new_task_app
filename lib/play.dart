@@ -44,7 +44,7 @@ class _PlayScreenState extends State<PlayScreen> with WidgetsBindingObserver {
                 builder: (context) => const GameHome(),
               ),
             );
-            if (gameCoins >= phase) {
+            if (gameCoins >= phase && phase != 0) {
               _prefs = await SharedPreferences.getInstance();
               _prefs.setInt('${phase}Coin-Completiontime',
                   DateTime.now().millisecondsSinceEpoch);
@@ -53,54 +53,66 @@ class _PlayScreenState extends State<PlayScreen> with WidgetsBindingObserver {
         ),
         title: const Text('PLAY'),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // CommonTopLeftIcon(),
-              Commontop(
-                refreshCallback: _refreshData,
+      body: PopScope(
+        onPopInvoked: (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GameHome(),
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              const CommonMinCoinBar(),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: FutureBuilder<List<Applink>>(
-                  future: fetchPlayData('playlinks'),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          // print(snapshot.data![index].link);
-                          return commontask(
-                            btnText: "PLAY",
-                            stayTime: "5", //40
-                            winCoin: "160",
-                            url: snapshot.data![index].link,
-                            index: index,
-                          );
-                        },
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text('${snapshot.error}');
-                    }
-
-                    return const Center(
-                      child: Text(
-                        'Loading...',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
-                  },
+            );
+          });
+        },
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                // CommonTopLeftIcon(),
+                Commontop(
+                  refreshCallback: _refreshData,
                 ),
-              ),
-            ],
+                const SizedBox(
+                  height: 16,
+                ),
+                const CommonMinCoinBar(),
+                const SizedBox(
+                  height: 20,
+                ),
+                Expanded(
+                  child: FutureBuilder<List<Applink>>(
+                    future: fetchPlayData('playlinks'),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            // print(snapshot.data![index].link);
+                            return commontask(
+                              btnText: "PLAY",
+                              stayTime: "5", //40
+                              winCoin: "160",
+                              url: snapshot.data![index].link,
+                              index: index,
+                            );
+                          },
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('${snapshot.error}');
+                      }
+
+                      return const Center(
+                        child: Text(
+                          'Loading...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

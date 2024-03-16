@@ -44,8 +44,7 @@ class _CommonPremiumTaskState extends State<CommonPremiumTask> {
     DateTime now = DateTime.now();
     Duration difference = now.difference(_lastCompletion);
 
-    // return difference.inHours >= 24;
-    return difference.inMinutes >= 5;
+    return difference.inMinutes >= 24;
   }
 
   void _performTask() {

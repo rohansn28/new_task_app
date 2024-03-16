@@ -47,6 +47,7 @@ class _GameHomeState extends State<GameHome> {
 
   @override
   Widget build(BuildContext context) {
+    print(phase);
     return Scaffold(
       bottomNavigationBar: Container(
         height: 67,

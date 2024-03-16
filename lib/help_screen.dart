@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:new_task/game_home.dart';
+import 'package:new_task/utils/chrome_custom_tabs.dart';
 import 'package:new_task/variables/local_variables.dart';
 import 'package:new_task/widgets/commonadmarkbottom.dart';
 import 'package:new_task/widgets/commonmincoinbar.dart';
@@ -14,6 +15,7 @@ class HelpScreen extends StatefulWidget {
 }
 
 class _HelpScreenState extends State<HelpScreen> {
+  late SharedPreferences _prefs;
   Future<void> _refreshData() async {
     // Fetch updated data from shared preferences
 
@@ -33,7 +35,7 @@ class _HelpScreenState extends State<HelpScreen> {
       appBar: AppBar(
         leading: InkWell(
           child: Icon(Icons.arrow_back),
-          onTap: () {
+          onTap: () async {
             Navigator.pop(context);
             Navigator.pushReplacement(
               context,
@@ -41,6 +43,11 @@ class _HelpScreenState extends State<HelpScreen> {
                 builder: (context) => GameHome(),
               ),
             );
+            if (gameCoins >= phase && phase != 0) {
+              _prefs = await SharedPreferences.getInstance();
+              _prefs.setInt('${phase}Coin-Completiontime',
+                  DateTime.now().millisecondsSinceEpoch);
+            }
           },
         ),
         title: const Text('HELP'),
@@ -70,6 +77,10 @@ class _HelpScreenState extends State<HelpScreen> {
                     child: Stack(
                       children: [
                         InkWell(
+                          onTap: () {
+                            launchCustomTabURL(
+                                context, 'https://play124.atmequiz.com/');
+                          },
                           child: Container(
                             height: 60,
                             width: MediaQuery.of(context).size.width * 0.6,
@@ -107,6 +118,10 @@ class _HelpScreenState extends State<HelpScreen> {
                     child: Stack(
                       children: [
                         InkWell(
+                          onTap: () {
+                            launchCustomTabURL(
+                                context, 'https://play124.atmequiz.com/');
+                          },
                           child: Container(
                             height: 60,
                             width: MediaQuery.of(context).size.width * 0.6,

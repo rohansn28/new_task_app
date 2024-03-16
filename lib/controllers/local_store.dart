@@ -28,6 +28,7 @@ void initPrefs(context) async {
     prefs.setInt('phase4', 20000);
 
     gameCoins = 0;
+    phase = prefs.getInt('phase1')!;
   }
   Navigator.popAndPushNamed(context, "/gamehome");
 }
@@ -35,7 +36,7 @@ void initPrefs(context) async {
 Future<int> increaseGameCoin(int value) async {
   final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  if ((gameCoins + value) >= 19000) {
+  if ((gameCoins + value) >= 19000 && gameCoins < 19000) {
     prefs.setInt(gameCoinsLabel, prefs.getInt(gameCoinsLabel)! + 1);
     gameCoins = prefs.getInt(gameCoinsLabel)!;
   } else {

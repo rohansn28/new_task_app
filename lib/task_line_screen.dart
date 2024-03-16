@@ -32,7 +32,7 @@ class _TaskLineScreenState extends State<TaskLineScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('task screen is working');
+    // print('task screen is working');
     return Scaffold(
       appBar: AppBar(
         leading: InkWell(
@@ -45,7 +45,7 @@ class _TaskLineScreenState extends State<TaskLineScreen> {
                 builder: (context) => GameHome(),
               ),
             );
-            if (gameCoins >= phase) {
+            if (gameCoins >= phase && phase != 0) {
               _prefs = await SharedPreferences.getInstance();
               _prefs.setInt('${phase}Coin-Completiontime',
                   DateTime.now().millisecondsSinceEpoch);
@@ -54,53 +54,65 @@ class _TaskLineScreenState extends State<TaskLineScreen> {
         ),
         title: const Text('TASK LINE'),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Commontop(
-                refreshCallback: _refreshData,
+      body: PopScope(
+        onPopInvoked: (didPop) {
+          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => GameHome(),
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              const CommonMinCoinBar(),
-              const SizedBox(
-                height: 20,
-              ),
-              Expanded(
-                child: FutureBuilder<List<Applink>>(
-                  future: fetchTasklineData('tasklinelinks'),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          // print(snapshot.data![index].link);
-                          return commontask(
-                            btnText: "TASK ${index + 1}",
-                            stayTime: "5", //50
-                            winCoin: "300",
-                            url: snapshot.data![index].link,
-                            index: index,
-                          );
-                        },
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text('${snapshot.error}');
-                    }
-
-                    return const Center(
-                      child: Text(
-                        'Loading...',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    );
-                  },
+            );
+          });
+        },
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Commontop(
+                  refreshCallback: _refreshData,
                 ),
-              ),
-            ],
+                const SizedBox(
+                  height: 16,
+                ),
+                const CommonMinCoinBar(),
+                const SizedBox(
+                  height: 20,
+                ),
+                Expanded(
+                  child: FutureBuilder<List<Applink>>(
+                    future: fetchTasklineData('tasklinelinks'),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return ListView.builder(
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            // print(snapshot.data![index].link);
+                            return commontask(
+                              btnText: "TASK ${index + 1}",
+                              stayTime: "5", //50
+                              winCoin: "3000", //300
+                              url: snapshot.data![index].link,
+                              index: index,
+                            );
+                          },
+                        );
+                      } else if (snapshot.hasError) {
+                        return Text('${snapshot.error}');
+                      }
+
+                      return const Center(
+                        child: Text(
+                          'Loading...',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

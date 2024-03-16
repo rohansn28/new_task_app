@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:new_task/bonus_screen.dart';
-
 import 'package:new_task/game_home.dart';
 import 'package:new_task/game_screen.dart';
 import 'package:new_task/help_screen.dart';
@@ -9,6 +8,7 @@ import 'package:new_task/premium_screen.dart';
 import 'package:new_task/resumetracking_screen.dart';
 import 'package:new_task/startpage.dart';
 import 'package:new_task/task_line_screen.dart';
+
 import 'package:new_task/utils/web.dart';
 
 void main() async {
@@ -24,7 +24,6 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // fetchData();
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
